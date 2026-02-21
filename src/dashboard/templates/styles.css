@@ -1,0 +1,410 @@
+:root {
+  --bg: #0d1117;
+  --bg-card: #161b22;
+  --bg-insight: #1c2128;
+  --bg-anomaly: #2d1b1b;
+  --border: #21262d;
+  --grid: #21262d;
+  --zeroline: #30363d;
+  --text: #c9d1d9;
+  --text-heading: #f0f6fc;
+  --text-muted: #8b949e;
+  --text-faint: #6e7681;
+  --text-dimmed: #484f58;
+  --accent: #58a6ff;
+  --green: #3fb950;
+  --yellow: #d29922;
+  --red: #da3633;
+  --purple: #bc8cff;
+  --repro-bg: #161b22;
+  --repro-text: #3fb950;
+}
+[data-theme="light"] {
+  --bg: #ffffff;
+  --bg-card: #f6f8fa;
+  --bg-insight: #f0f4f8;
+  --bg-anomaly: #fff0f0;
+  --border: #d0d7de;
+  --grid: #e8eaed;
+  --zeroline: #d0d7de;
+  --text: #1f2328;
+  --text-heading: #1f2328;
+  --text-muted: #59636e;
+  --text-faint: #8b949e;
+  --text-dimmed: #8b949e;
+  --accent: #0969da;
+  --green: #1a7f37;
+  --yellow: #9a6700;
+  --red: #d1242f;
+  --purple: #8250df;
+  --repro-bg: #f6f8fa;
+  --repro-text: #1a7f37;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, monospace;
+  background: var(--bg);
+  color: var(--text);
+  transition: background 0.2s, color 0.2s;
+}
+a {
+  color: var(--accent);
+}
+
+.header {
+  padding: 20px 32px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.header-left h1 {
+  font-size: 20px;
+  font-weight: 600;
+}
+.header-left .meta {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+.theme-toggle {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 12px;
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+.theme-toggle:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+
+.stats {
+  display: flex;
+  gap: 32px;
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+.stat {
+  text-align: center;
+  min-width: 80px;
+}
+.stat .value {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--accent);
+}
+.stat .value.warn {
+  color: var(--yellow);
+}
+.stat .value.bad {
+  color: var(--red);
+}
+.stat .label {
+  font-size: 12px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.section {
+  padding: 16px 32px;
+  border-bottom: 1px solid var(--border);
+}
+.section h2 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-heading);
+}
+.section p, .section li {
+  font-size: 13px;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+.section ul {
+  margin-left: 20px;
+}
+
+.params {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 2px 16px;
+  font-size: 13px;
+}
+.params dt {
+  color: var(--text-muted);
+}
+.params dd {
+  color: var(--text);
+  font-family: monospace;
+}
+
+.repro {
+  background: var(--repro-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px;
+  margin-top: 8px;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--repro-text);
+  white-space: pre-wrap;
+  word-break: break-all;
+  cursor: pointer;
+  position: relative;
+}
+.repro:hover {
+  border-color: var(--green);
+}
+.repro .repro-hint {
+  position: absolute;
+  right: 8px;
+  top: -10px;
+  font-size: 10px;
+  color: var(--text-dimmed);
+  background: var(--bg);
+  padding: 1px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  transition: all 0.15s;
+}
+.repro .repro-hint.copied {
+  color: var(--green);
+  border-color: var(--green);
+}
+
+.charts {
+  padding: 16px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+.chart {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0;
+  overflow: visible;
+}
+.chart.full {
+  grid-column: 1 / -1;
+  grid-template-columns: 1fr 280px;
+}
+.chart.full .chart-help {
+  border-left: 1px solid var(--border);
+  border-top: none;
+}
+.chart:not(.full) .chart-help {
+  border-top: 1px solid var(--border);
+  border-left: none;
+  max-height: none;
+}
+
+.chart-help {
+  font-size: 12px;
+  color: var(--text-muted);
+  padding: 12px 16px;
+  line-height: 1.7;
+  overflow: visible;
+}
+.chart-help .title {
+  color: var(--text-heading);
+  font-weight: 600;
+  display: block;
+  margin-bottom: 6px;
+  font-size: 13px;
+}
+.chart-help .legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+.chart-help .legend-item {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  cursor: pointer;
+  user-select: none;
+  padding: 2px 4px;
+  border-radius: 3px;
+  transition: opacity 0.15s;
+}
+.chart-help .legend-item:hover {
+  background: var(--border);
+}
+.chart-help .legend-item.hidden {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+.chart-help .legend-dot {
+  width: 10px;
+  height: 3px;
+  border-radius: 1px;
+  display: inline-block;
+  transition: opacity 0.15s;
+}
+.chart-help .insight {
+  background: var(--bg-insight);
+  border-left: 3px solid var(--accent);
+  padding: 6px 10px;
+  margin: 6px 0;
+  border-radius: 0 4px 4px 0;
+  font-size: 12px;
+  color: var(--text);
+  transition: background 0.15s;
+}
+.chart-help .insight[data-highlight]:hover {
+  background: var(--border);
+  cursor: pointer;
+}
+.chart-help .insight.warn {
+  border-left-color: var(--yellow);
+}
+.chart-help .insight.bad {
+  border-left-color: var(--red);
+}
+.chart-help .insight.good {
+  border-left-color: var(--green);
+}
+.chart-help .how-to {
+  color: var(--text-faint);
+  font-size: 11px;
+  margin-top: 6px;
+}
+
+.kw {
+  border-bottom: 1px dotted var(--text-dimmed);
+  cursor: help;
+  position: relative;
+}
+.kw:hover {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+.kw-tip {
+  display: none;
+  position: fixed;
+  z-index: 999999;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text);
+  white-space: normal;
+  width: 260px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  line-height: 1.5;
+  pointer-events: none;
+}
+.kw-tip.visible {
+  display: block;
+}
+
+.plot {
+  width: 100%;
+  height: 350px;
+}
+.plot.tall {
+  height: 450px;
+}
+
+.live-status {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  padding: 6px 14px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  z-index: 1000;
+  border: 1px solid var(--border);
+  background: var(--bg-card);
+}
+.live-status.connected {
+  color: var(--green);
+  border-color: var(--green);
+}
+.live-status.complete {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.live-status .dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  margin-right: 6px;
+  animation: pulse 1.5s infinite;
+}
+.live-status.connected .dot {
+  background: var(--green);
+}
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}
+
+.engine-log {
+  font-family: monospace;
+  font-size: 12px;
+  line-height: 1.8;
+  color: var(--text-muted);
+  white-space: pre-wrap;
+}
+.engine-log .log-entry {
+  padding: 2px 0;
+  border-bottom: 1px solid var(--border);
+}
+.engine-log .log-entry:last-child {
+  border-bottom: none;
+}
+.engine-log .log-time {
+  color: var(--text-faint);
+  margin-right: 8px;
+}
+
+.deferred-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg-card);
+  opacity: 0.85;
+  color: var(--text);
+  font-size: 14px;
+  z-index: 10;
+  border-radius: 8px;
+}
+
+@media (max-width: 900px) {
+  .charts {
+    grid-template-columns: 1fr;
+  }
+  .chart.full {
+    grid-template-columns: 1fr;
+  }
+  .chart.full .chart-help {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}

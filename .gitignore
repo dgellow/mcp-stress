@@ -1,0 +1,12 @@
+# Output files
+*.ndjson
+/*.html
+
+# Test MCP servers
+mcps/
+
+# Deno
+deno.lock
+
+# Benchmarks
+bench/

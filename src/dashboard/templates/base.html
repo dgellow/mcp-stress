@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>mcp-stress — {{TITLE}}</title>
+<script src="https://cdn.plot.ly/plotly-3.3.1.min.js"></script>
+<style>
+{{STYLES}}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-left">
+    <h1>mcp-stress results</h1>
+    <div class="meta" id="meta"></div>
+  </div>
+  <button class="theme-toggle" id="theme-toggle">Light mode</button>
+</div>
+<div class="stats" id="stats"></div>
+
+<div class="section" id="run-params"></div>
+<div class="section engine-log" id="engine-log" style="display:none"></div>
+
+<div class="charts">
+  <div class="chart full">
+    <div id="throughput" class="plot"></div>
+    <div class="chart-help" id="help-throughput"></div>
+  </div>
+  <div class="chart full">
+    <div id="latency-time" class="plot tall"></div>
+    <div class="chart-help" id="help-latency-time"></div>
+  </div>
+  <div class="chart">
+    <div id="latency-hist" class="plot"></div>
+    <div class="chart-help" id="help-latency-hist"></div>
+  </div>
+  <div class="chart">
+    <div id="latency-box" class="plot"></div>
+    <div class="chart-help" id="help-latency-box"></div>
+  </div>
+  <div class="chart full" id="concurrency-section">
+    <div id="concurrency" class="plot tall"></div>
+    <div class="chart-help" id="help-concurrency"></div>
+  </div>
+</div>
+
+<div id="compare-section" style="display:none"></div>
+
+<script>
+{{DATA}}
+</script>
+<script>
+{{SCRIPTS}}
+</script>
+</body>
+</html>
