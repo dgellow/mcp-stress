@@ -59,28 +59,40 @@ jobs:
         if: always()
         run: npm publish --access public --provenance
         working-directory: ./npm/linux-x64
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @mcp-stress/linux-arm64
         if: always()
         run: npm publish --access public --provenance
         working-directory: ./npm/linux-arm64
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @mcp-stress/darwin-x64
         if: always()
         run: npm publish --access public --provenance
         working-directory: ./npm/darwin-x64
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @mcp-stress/darwin-arm64
         if: always()
         run: npm publish --access public --provenance
         working-directory: ./npm/darwin-arm64
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish @mcp-stress/win32-x64
         if: always()
         run: npm publish --access public --provenance
         working-directory: ./npm/win32-x64
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Publish mcp-stress
         if: always()
         run: npm publish --access public --provenance
         working-directory: ./npm/mcp-stress
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
