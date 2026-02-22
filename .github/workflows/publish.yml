@@ -1,0 +1,86 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+jobs:
+  publish-jsr:
+    name: Publish to JSR
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          cache: true
+
+      - name: Publish to JSR
+        run: deno publish
+
+  publish-npm:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup Deno
+        uses: denoland/setup-deno@v2
+        with:
+          cache: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Update npm to latest
+        run: npm install -g npm@latest && npm --version
+
+      - name: Build npm packages
+        run: deno run -A scripts/build_npm.ts
+
+      - name: Publish @mcp-stress/linux-x64
+        if: always()
+        run: npm publish --access public --provenance
+        working-directory: ./npm/linux-x64
+
+      - name: Publish @mcp-stress/linux-arm64
+        if: always()
+        run: npm publish --access public --provenance
+        working-directory: ./npm/linux-arm64
+
+      - name: Publish @mcp-stress/darwin-x64
+        if: always()
+        run: npm publish --access public --provenance
+        working-directory: ./npm/darwin-x64
+
+      - name: Publish @mcp-stress/darwin-arm64
+        if: always()
+        run: npm publish --access public --provenance
+        working-directory: ./npm/darwin-arm64
+
+      - name: Publish @mcp-stress/win32-x64
+        if: always()
+        run: npm publish --access public --provenance
+        working-directory: ./npm/win32-x64
+
+      - name: Publish mcp-stress
+        if: always()
+        run: npm publish --access public --provenance
+        working-directory: ./npm/mcp-stress

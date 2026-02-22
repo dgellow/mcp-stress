@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+# Detect platform if not passed
+if [ -z "${1:-}" ]; then
+  os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+  arch="$(uname -m)"
+  case "$arch" in
+    x86_64) arch="x64" ;;
+    aarch64|arm64) arch="arm64" ;;
+  esac
+  platform="${os}-${arch}"
+else
+  platform="$1"
+fi
+
+echo "=== Deno compile ==="
+deno compile -A --output ./build/mcp-stress src/main.ts
+
+echo ""
+echo "=== npm build ($platform) ==="
+deno run -A scripts/build_npm.ts --platform "$platform"
+
+echo ""
+echo "Build complete."

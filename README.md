@@ -4,16 +4,13 @@ Stress testing tool for MCP (Model Context Protocol) servers.
 
 ## Install
 
-Requires [Deno](https://deno.land/).
+```bash
+# npm
+npx mcp-stress <command>
+npm install -g mcp-stress
 
-```
-deno install -A --name mcp-stress src/main.ts
-```
-
-Or run directly:
-
-```
-deno run -A src/main.ts <command> [options]
+# JSR / Deno
+deno install -g -A --name mcp-stress jsr:@dgellow/mcp-stress/cli
 ```
 
 ## Commands
@@ -44,22 +41,22 @@ mcp-stress run -n 5 -v -- node my-server.js
 
 **Options:**
 
-| Flag | Description |
-|------|-------------|
-| `-p, --profile` | Workload profile (default: `tool-flood`) |
-| `-d, --duration` | Test duration in seconds (default: 10) |
-| `-n, --requests` | Stop after N requests (overrides duration) |
-| `-c, --concurrency` | Peak concurrent workers (default: 1) |
-| `-t, --timeout` | Request timeout in ms (default: 30000) |
-| `--tool` | Target a specific tool by name |
-| `--shape` | Load shape: `constant`, `linear-ramp`, `exponential`, `step`, `spike`, `sawtooth` |
-| `-o, --output` | NDJSON output file path |
-| `--live` | Open real-time browser dashboard |
-| `--json` | Output JSON summary to stdout |
-| `--assert` | Threshold assertion, repeatable (e.g. `"p99 < 500ms"`) |
-| `--seed` | PRNG seed for reproducibility |
-| `--sse` | Use legacy HTTP+SSE transport (default: streamable-http) |
-| `-v, --verbose` | Log every request/response |
+| Flag                | Description                                                                       |
+| ------------------- | --------------------------------------------------------------------------------- |
+| `-p, --profile`     | Workload profile (default: `tool-flood`)                                          |
+| `-d, --duration`    | Test duration in seconds (default: 10)                                            |
+| `-n, --requests`    | Stop after N requests (overrides duration)                                        |
+| `-c, --concurrency` | Peak concurrent workers (default: 1)                                              |
+| `-t, --timeout`     | Request timeout in ms (default: 30000)                                            |
+| `--tool`            | Target a specific tool by name                                                    |
+| `--shape`           | Load shape: `constant`, `linear-ramp`, `exponential`, `step`, `spike`, `sawtooth` |
+| `-o, --output`      | NDJSON output file path                                                           |
+| `--live`            | Open real-time browser dashboard                                                  |
+| `--json`            | Output JSON summary to stdout                                                     |
+| `--assert`          | Threshold assertion, repeatable (e.g. `"p99 < 500ms"`)                            |
+| `--seed`            | PRNG seed for reproducibility                                                     |
+| `--sse`             | Use legacy HTTP+SSE transport (default: streamable-http)                          |
+| `-v, --verbose`     | Log every request/response                                                        |
 
 ### chart
 
@@ -106,13 +103,16 @@ mcp-stress shapes
 
 ## Transports
 
-- **stdio** (default): Spawns the server as a subprocess. Use `-- command [args]`.
+- **stdio** (default): Spawns the server as a subprocess. Use
+  `-- command [args]`.
 - **Streamable HTTP**: Connect to a running server. Use `--url`.
 - **SSE** (legacy): Use `--url` with `--sse`.
 
 ## Output
 
-All test data is written as NDJSON (newline-delimited JSON) with three event types:
+All test data is written as NDJSON (newline-delimited JSON) with three event
+types:
+
 - `meta` — run parameters and configuration
 - `request` — individual request results (method, latency, ok/error)
 - `summary` — aggregate statistics
@@ -120,6 +120,8 @@ All test data is written as NDJSON (newline-delimited JSON) with three event typ
 ## Development
 
 ```bash
-deno task check    # Type check
-deno task test     # Run tests
+./scripts/lint     # Format check + type check
+./scripts/test     # Run tests
+./scripts/build    # Compile binary + npm packages
+./scripts/start    # Run the CLI
 ```

@@ -2,6 +2,10 @@
 *.ndjson
 /*.html
 
+# Build artifacts
+build/
+npm/
+
 # Test MCP servers
 mcps/
 

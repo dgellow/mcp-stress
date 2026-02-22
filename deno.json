@@ -1,9 +1,29 @@
 {
+  "name": "@dgellow/mcp-stress",
+  "version": "0.1.0",
+  "license": "MIT",
+  "exports": {
+    "./cli": "./src/main.ts"
+  },
+  "publish": {
+    "include": [
+      "src/**/*.ts",
+      "README.md",
+      "LICENSE"
+    ],
+    "exclude": [
+      "src/tests/**"
+    ]
+  },
   "tasks": {
     "dev": "deno run --watch -A src/main.ts",
     "stress": "deno run -A src/main.ts",
     "check": "deno check src/main.ts",
     "test": "deno test src/tests/"
+  },
+  "exclude": ["mcps/"],
+  "fmt": {
+    "exclude": ["src/dashboard/templates/"]
   },
   "imports": {
     "@std/assert": "jsr:@std/assert@1"
