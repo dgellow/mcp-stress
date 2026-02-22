@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { percentile } from "../metrics/stats.ts";
+import { percentile } from "../src/metrics/stats.ts";
 
 Deno.test("percentile: empty array", () => {
   assertEquals(percentile([], 0.5), 0);

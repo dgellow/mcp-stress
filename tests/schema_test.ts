@@ -4,7 +4,7 @@ import {
   generateRandomArgsFromSchema,
   rng,
   setSeed,
-} from "../schema.ts";
+} from "../src/schema.ts";
 
 Deno.test("rng: seeded determinism", () => {
   setSeed(12345);

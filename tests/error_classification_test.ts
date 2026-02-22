@@ -1,5 +1,5 @@
 import { assertEquals } from "@std/assert";
-import { classifyError, McpError } from "../transport/types.ts";
+import { classifyError, McpError } from "../src/transport/types.ts";
 
 Deno.test("classifyError: McpError passes through", () => {
   const err = new McpError("server", -32603, "internal error", null, 100);

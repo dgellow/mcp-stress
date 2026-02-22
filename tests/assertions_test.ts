@@ -3,7 +3,7 @@ import {
   evaluateAssertions,
   metricsToAssertionMap,
   parseAssertions,
-} from "../engine/assertions.ts";
+} from "../src/engine/assertions.ts";
 
 Deno.test("parseAssertions: basic operators", () => {
   const result = parseAssertions(["p99 < 500ms"]);
