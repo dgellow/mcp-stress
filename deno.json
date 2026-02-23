@@ -8,6 +8,7 @@
   "publish": {
     "include": [
       "src/**/*.ts",
+      "src/dashboard/templates/**",
       "README.md",
       "LICENSE"
     ],

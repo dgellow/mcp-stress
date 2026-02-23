@@ -87,6 +87,10 @@ for (const platform of platforms) {
     args: [
       "compile",
       "-A",
+      "--include",
+      "src/dashboard/templates/",
+      "--include",
+      "src/metrics/writer_worker.ts",
       "--target",
       platform.target,
       "--output",

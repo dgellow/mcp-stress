@@ -15,7 +15,7 @@ else
 fi
 
 echo "=== Deno compile ==="
-deno compile -A --output ./build/mcp-stress src/main.ts
+deno compile -A --include src/dashboard/templates/ --include src/metrics/writer_worker.ts --output ./build/mcp-stress src/main.ts
 
 echo ""
 echo "=== npm build ($platform) ==="
