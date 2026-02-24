@@ -3,11 +3,7 @@
  */
 
 import { McpClient } from "../client.ts";
-import type {
-  RequestResult,
-  Transport,
-  TransportOptions,
-} from "../transport/types.ts";
+import type { Transport, TransportOptions } from "../transport/types.ts";
 import { McpError } from "../transport/types.ts";
 import type { MetaEvent, RequestEvent } from "../metrics/events.ts";
 import { Recorder } from "../metrics/recorder.ts";
@@ -21,6 +17,7 @@ export interface RunOptions {
   profile: WorkloadProfile;
   createTransport: () => Transport;
   transportOpts: TransportOptions;
+  name?: string;
   seed?: number;
   outputPath?: string;
   onEvent?: (event: RequestEvent) => void;
@@ -84,6 +81,7 @@ export async function executeRun(opts: RunOptions): Promise<RunResult> {
 
   const meta: MetaEvent = {
     type: "meta",
+    name: opts.name,
     profile: profile.name,
     shape: profile.shape,
     concurrency: profile.concurrency,

@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
 set -euo pipefail
 deno fmt --check
-deno check src/main.ts
+deno check
+deno lint

@@ -72,7 +72,7 @@ export class SseTransport implements Transport {
     this.log("---", `POST endpoint: ${this.postUrl}`);
   }
 
-  async request(method: string, params?: unknown): Promise<RequestResult> {
+  request(method: string, params?: unknown): Promise<RequestResult> {
     if (this._closed) throw new Error("Transport is closed");
     if (!this.postUrl) throw new Error("Not connected — no POST endpoint");
 

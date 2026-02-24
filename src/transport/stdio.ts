@@ -31,6 +31,7 @@ export class StdioTransport implements Transport {
 
   constructor(private opts: StdioTransportOptions) {}
 
+  // deno-lint-ignore require-await
   async connect(): Promise<void> {
     const cmd = new Deno.Command(this.opts.command, {
       args: this.opts.args,

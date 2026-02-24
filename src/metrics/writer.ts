@@ -52,7 +52,7 @@ export class Writer {
    * Wait for the writer to finish and return final stats.
    * The writer sends stats back after receiving a "complete" message.
    */
-  async stats(): Promise<SummaryEvent> {
+  stats(): Promise<SummaryEvent> {
     return this._stats;
   }
 

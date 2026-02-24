@@ -30,7 +30,13 @@
       "src/dashboard/templates/"
     ]
   },
+  "lint": {
+    "exclude": [
+      "src/dashboard/templates/"
+    ]
+  },
   "imports": {
-    "@std/assert": "jsr:@std/assert@1"
+    "@std/assert": "jsr:@std/assert@1",
+    "@std/path": "jsr:@std/path@1"
   }
 }

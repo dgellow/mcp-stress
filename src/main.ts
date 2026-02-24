@@ -5,10 +5,12 @@
 import { runCommand } from "./commands/run.ts";
 import { chartCommand } from "./commands/chart.ts";
 import { compareCommand } from "./commands/compare.ts";
+import { historyCommand } from "./commands/history.ts";
 import { diagnoseCommand } from "./commands/diagnose.ts";
 import { discoverCommand } from "./commands/discover.ts";
 import { SHAPES } from "./engine/shapes.ts";
 import { BUILTIN_PROFILES } from "./engine/workload.ts";
+import { ensureRunsDir } from "./history.ts";
 
 function usage(): void {
   console.log(`
@@ -17,8 +19,9 @@ mcp-stress - Stress testing tool for MCP servers
 USAGE:
   mcp-stress run [options] -- <command> [args...]
   mcp-stress run [options] --url <url>
-  mcp-stress compare <baseline.ndjson> <current.ndjson> [options]
-  mcp-stress chart <input.ndjson> [output.html] [options]
+  mcp-stress compare <baseline> <current> [options]
+  mcp-stress chart <input> [output.html] [options]
+  mcp-stress history [list | rm <name>]
   mcp-stress diagnose [--url <url> | -- <command>]
   mcp-stress discover [--url <url> | -- <command>]
   mcp-stress profiles
@@ -26,8 +29,9 @@ USAGE:
 
 COMMANDS:
   run               Execute a stress test
-  compare           Compare two test runs, detect regressions
-  chart             Generate interactive HTML chart from NDJSON
+  compare           Compare two test runs (file paths or saved names)
+  chart             Generate HTML chart (file path or saved name)
+  history           List or manage saved runs
   diagnose          Probe server connectivity and protocol compliance
   discover          Enumerate server capabilities
   profiles          List built-in workload profiles
@@ -42,6 +46,7 @@ RUN OPTIONS:
   --tool            Target a specific tool by name
   --shape           Load shape: constant, linear-ramp, exponential, step, spike, sawtooth
   -o, --output      NDJSON output file path
+  --name            Save run to history with this label (must be unique)
   --live            Open real-time browser dashboard
   --json            Output JSON summary to stdout
   --assert          Threshold check, repeatable (e.g. "p99 < 500ms")
@@ -65,8 +70,12 @@ EXAMPLES:
   mcp-stress run --json --assert "p99 < 500ms" --assert "error_rate < 1%" -- node server.js
   mcp-stress run --url http://localhost:3000/mcp -d 30 -c 5
   mcp-stress run --url http://localhost:3000/sse --sse -d 30
+  mcp-stress run --name baseline -d 30 -c 10 -- node server.js
+  mcp-stress run --name after-fix -d 30 -c 10 -- node server.js
+  mcp-stress compare baseline after-fix --open
   mcp-stress chart --open results.ndjson
-  mcp-stress compare baseline.ndjson current.ndjson --open
+  mcp-stress history
+  mcp-stress history rm baseline
 `);
 }
 
@@ -86,6 +95,7 @@ interface ParsedArgs {
     outputPath: string;
     requests: number | undefined;
     seed: number | undefined;
+    name: string;
     live: boolean;
     asserts: string[];
     open: boolean;
@@ -115,6 +125,7 @@ function parseArgs(args: string[]): ParsedArgs {
   let outputPath = "";
   let requests: number | undefined;
   let seed: number | undefined;
+  let name = "";
   let live = false;
   let open = false;
   const asserts: string[] = [];
@@ -171,6 +182,9 @@ function parseArgs(args: string[]): ParsedArgs {
       case "--seed":
         seed = parseInt(ourArgs[++i] ?? "0");
         break;
+      case "--name":
+        name = ourArgs[++i] ?? "";
+        break;
       case "--live":
         live = true;
         break;
@@ -217,6 +231,7 @@ function parseArgs(args: string[]): ParsedArgs {
       outputPath,
       requests,
       seed,
+      name,
       live,
       asserts,
       open,
@@ -236,6 +251,8 @@ async function main(): Promise<void> {
   }
 
   const parsed = parseArgs(raw);
+  const home = Deno.env.get("HOME") ?? Deno.env.get("USERPROFILE") ?? ".";
+  const runsDir = await ensureRunsDir(home);
 
   switch (parsed.command) {
     case "profiles": {
@@ -265,6 +282,7 @@ async function main(): Promise<void> {
       }
 
       const exitCode = await runCommand({
+        runsDir,
         profile: parsed.opts.profile || undefined,
         durationSec: parsed.opts.requests ? 3600 : parsed.opts.durationSec,
         requests: parsed.opts.requests,
@@ -273,6 +291,7 @@ async function main(): Promise<void> {
         tool: parsed.opts.tool || undefined,
         shape: parsed.opts.shape || undefined,
         outputPath: parsed.opts.outputPath || undefined,
+        name: parsed.opts.name || undefined,
         seed: parsed.opts.seed,
         json: parsed.opts.json,
         verbose: parsed.opts.verbose,
@@ -300,6 +319,7 @@ async function main(): Promise<void> {
       const outputPath = parsed.positionalArgs[1] || parsed.opts.outputPath ||
         undefined;
       const exitCode = await chartCommand({
+        runsDir,
         inputPath,
         outputPath,
         open: parsed.opts.open,
@@ -316,11 +336,24 @@ async function main(): Promise<void> {
         Deno.exit(1);
       }
       const exitCode = await compareCommand({
+        runsDir,
         baselinePath,
         currentPath,
         open: parsed.opts.open,
         json: parsed.opts.json,
         asserts: parsed.opts.asserts,
+      });
+      Deno.exit(exitCode);
+      break;
+    }
+
+    case "history": {
+      const sub = parsed.positionalArgs[0] ?? "";
+      const subArgs = parsed.positionalArgs.slice(1);
+      const exitCode = await historyCommand({
+        runsDir,
+        subcommand: sub,
+        args: subArgs,
       });
       Deno.exit(exitCode);
       break;

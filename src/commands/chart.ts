@@ -4,19 +4,29 @@
 
 import { readNdjson } from "../metrics/ndjson.ts";
 import { renderHtml } from "../dashboard/render.ts";
+import { looksLikeFilePath, resolveRunPath } from "../history.ts";
 
 export interface ChartCommandOptions {
+  runsDir: string;
   inputPath: string;
   outputPath?: string;
   open: boolean;
 }
 
 export async function chartCommand(opts: ChartCommandOptions): Promise<number> {
-  const outputPath = opts.outputPath ??
-    opts.inputPath.replace(/\.ndjson$/, ".html");
+  const resolvedInput = await resolveRunPath(opts.runsDir, opts.inputPath);
 
-  console.log(`Reading ${opts.inputPath}...`);
-  const data = await readNdjson(opts.inputPath);
+  let outputPath: string;
+  if (opts.outputPath) {
+    outputPath = opts.outputPath;
+  } else if (looksLikeFilePath(opts.inputPath)) {
+    outputPath = opts.inputPath.replace(/\.ndjson$/, ".html");
+  } else {
+    outputPath = `${opts.inputPath}.html`;
+  }
+
+  console.log(`Reading ${resolvedInput}...`);
+  const data = await readNdjson(resolvedInput);
 
   if (data.events.length === 0) {
     console.error("No events found in input file.");

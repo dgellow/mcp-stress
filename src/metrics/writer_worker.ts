@@ -28,7 +28,6 @@ import type {
   MethodStats,
   RequestEvent,
   SummaryEvent,
-  WindowStats,
 } from "./events.ts";
 import type { ErrorCategory } from "../transport/types.ts";
 import { percentile } from "./stats.ts";

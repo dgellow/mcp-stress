@@ -6,6 +6,7 @@ import type { ErrorCategory } from "../transport/types.ts";
 
 export interface MetaEvent {
   type: "meta";
+  name?: string;
   profile: string;
   shape: string;
   concurrency: number;

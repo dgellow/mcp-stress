@@ -6,8 +6,10 @@ import { type ParsedNdjson, readNdjson } from "../metrics/ndjson.ts";
 import { effectSize, percentile, welchTTest } from "../metrics/stats.ts";
 import { renderHtml } from "../dashboard/render.ts";
 import { evaluateAssertions, parseAssertions } from "../engine/assertions.ts";
+import { looksLikeFilePath, resolveRunPath } from "../history.ts";
 
 export interface CompareCommandOptions {
+  runsDir: string;
   baselinePath: string;
   currentPath: string;
   outputPath?: string;
@@ -46,17 +48,20 @@ interface CompareResult {
 export async function compareCommand(
   opts: CompareCommandOptions,
 ): Promise<number> {
+  const baselinePath = await resolveRunPath(opts.runsDir, opts.baselinePath);
+  const currentPath = await resolveRunPath(opts.runsDir, opts.currentPath);
+
   const [baseline, current] = await Promise.all([
-    readNdjson(opts.baselinePath),
-    readNdjson(opts.currentPath),
+    readNdjson(baselinePath),
+    readNdjson(currentPath),
   ]);
 
   if (baseline.events.length === 0) {
-    console.error(`No events in baseline file: ${opts.baselinePath}`);
+    console.error(`No events in baseline file: ${baselinePath}`);
     return 1;
   }
   if (current.events.length === 0) {
-    console.error(`No events in current file: ${opts.currentPath}`);
+    console.error(`No events in current file: ${currentPath}`);
     return 1;
   }
 
@@ -160,8 +165,8 @@ export async function compareCommand(
   const result: CompareResult = {
     diffs,
     regressions,
-    baselineFile: opts.baselinePath,
-    currentFile: opts.currentPath,
+    baselineFile: baselinePath,
+    currentFile: currentPath,
   };
 
   if (opts.json) {
@@ -171,8 +176,14 @@ export async function compareCommand(
   }
 
   // Always generate HTML (--open just controls whether to launch browser)
-  const outputPath = opts.outputPath ??
-    opts.currentPath.replace(/\.ndjson$/, "-compare.html");
+  let outputPath: string;
+  if (opts.outputPath) {
+    outputPath = opts.outputPath;
+  } else if (looksLikeFilePath(opts.currentPath)) {
+    outputPath = opts.currentPath.replace(/\.ndjson$/, "-compare.html");
+  } else {
+    outputPath = `${opts.currentPath}-compare.html`;
+  }
   const html = await renderHtml({
     mode: "compare",
     baseline: {

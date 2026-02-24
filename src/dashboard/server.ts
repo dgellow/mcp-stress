@@ -20,7 +20,7 @@ export interface DashboardServer {
   pushEvent(event: RequestEvent): void;
   pushMeta(meta: MetaEvent): void;
   pushMessage(msg: string): void;
-  complete(summary: SummaryEvent): Promise<void>;
+  complete(summary: SummaryEvent): void;
   stop(): Promise<void>;
 }
 
@@ -156,7 +156,7 @@ export function createDashboardServer(): DashboardServer {
       sendToAll("message", JSON.stringify({ text: msg, t: Date.now() }));
     },
 
-    async complete(summary: SummaryEvent) {
+    complete(summary: SummaryEvent) {
       // Flush any remaining window
       flushWindow();
       if (flushTimer !== null) {

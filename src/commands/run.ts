@@ -17,8 +17,10 @@ import {
   createDashboardServer,
   type DashboardServer,
 } from "../dashboard/server.ts";
+import { runExists, runPath, validateRunName } from "../history.ts";
 
 export interface RunCommandOptions {
+  runsDir: string;
   profile?: string;
   durationSec: number;
   requests?: number;
@@ -38,9 +40,29 @@ export interface RunCommandOptions {
   env?: Record<string, string>;
   headers?: Record<string, string>;
   live: boolean;
+  name?: string;
 }
 
 export async function runCommand(opts: RunCommandOptions): Promise<number> {
+  // Validate and resolve --name
+  let historyPath: string | undefined;
+  if (opts.name) {
+    const nameError = validateRunName(opts.name);
+    if (nameError) {
+      console.error(`Error: invalid run name: ${nameError}`);
+      return 1;
+    }
+    if (await runExists(opts.runsDir, opts.name)) {
+      console.error(
+        `Error: a run named "${opts.name}" already exists. Use 'mcp-stress history rm ${opts.name}' first.`,
+      );
+      return 1;
+    }
+    historyPath = runPath(opts.runsDir, opts.name);
+  }
+
+  const effectiveOutputPath = historyPath ?? opts.outputPath;
+
   const profile = resolveProfile(opts.profile, {
     durationSec: opts.durationSec,
     requests: opts.requests,
@@ -98,18 +120,24 @@ export async function runCommand(opts: RunCommandOptions): Promise<number> {
     profile,
     createTransport: makeTransport,
     transportOpts,
+    name: opts.name,
     seed: opts.seed,
-    outputPath: opts.outputPath,
+    outputPath: effectiveOutputPath,
     onEvent: dashboard ? (event) => dashboard!.pushEvent(event) : undefined,
     onMeta: dashboard ? (meta) => dashboard!.pushMeta(meta) : undefined,
     onMessage: dashboard ? (msg) => dashboard!.pushMessage(msg) : undefined,
   });
 
+  // Copy to -o path if both --name and -o were given
+  if (historyPath && opts.outputPath) {
+    await Deno.copyFile(historyPath, opts.outputPath);
+  }
+
   const summary = result.summary;
 
   // Complete and shut down the dashboard
   if (dashboard) {
-    await dashboard.complete(summary);
+    dashboard.complete(summary);
     await dashboard.stop();
   }
 
