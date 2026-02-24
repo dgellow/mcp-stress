@@ -6,6 +6,7 @@ import { runCommand } from "./commands/run.ts";
 import { chartCommand } from "./commands/chart.ts";
 import { compareCommand } from "./commands/compare.ts";
 import { historyCommand } from "./commands/history.ts";
+import { aggregateCommand } from "./commands/aggregate.ts";
 import { diagnoseCommand } from "./commands/diagnose.ts";
 import { discoverCommand } from "./commands/discover.ts";
 import { SHAPES } from "./engine/shapes.ts";
@@ -21,6 +22,7 @@ USAGE:
   mcp-stress run [options] --url <url>
   mcp-stress compare <baseline> <current> [options]
   mcp-stress chart <input> [output.html] [options]
+  mcp-stress aggregate <run1> <run2> [...] [options]
   mcp-stress history [list | rm <name>]
   mcp-stress diagnose [--url <url> | -- <command>]
   mcp-stress discover [--url <url> | -- <command>]
@@ -31,6 +33,7 @@ COMMANDS:
   run               Execute a stress test
   compare           Compare two test runs (file paths or saved names)
   chart             Generate HTML chart (file path or saved name)
+  aggregate         Combine multiple runs into a statistical summary
   history           List or manage saved runs
   diagnose          Probe server connectivity and protocol compliance
   discover          Enumerate server capabilities
@@ -47,6 +50,7 @@ RUN OPTIONS:
   --shape           Load shape: constant, linear-ramp, exponential, step, spike, sawtooth
   -o, --output      NDJSON output file path
   --name            Save run to history with this label (must be unique)
+  --repeat          Run the test N times and aggregate results
   --live            Open real-time browser dashboard
   --json            Output JSON summary to stdout
   --assert          Threshold check, repeatable (e.g. "p99 < 500ms")
@@ -72,7 +76,9 @@ EXAMPLES:
   mcp-stress run --url http://localhost:3000/sse --sse -d 30
   mcp-stress run --name baseline -d 30 -c 10 -- node server.js
   mcp-stress run --name after-fix -d 30 -c 10 -- node server.js
+  mcp-stress run --repeat 5 --name stable -d 30 -c 10 -- node server.js
   mcp-stress compare baseline after-fix --open
+  mcp-stress aggregate baseline after-fix --name combined
   mcp-stress chart --open results.ndjson
   mcp-stress history
   mcp-stress history rm baseline
@@ -96,6 +102,7 @@ interface ParsedArgs {
     requests: number | undefined;
     seed: number | undefined;
     name: string;
+    repeat: number | undefined;
     live: boolean;
     asserts: string[];
     open: boolean;
@@ -126,6 +133,7 @@ function parseArgs(args: string[]): ParsedArgs {
   let requests: number | undefined;
   let seed: number | undefined;
   let name = "";
+  let repeat: number | undefined;
   let live = false;
   let open = false;
   const asserts: string[] = [];
@@ -185,6 +193,9 @@ function parseArgs(args: string[]): ParsedArgs {
       case "--name":
         name = ourArgs[++i] ?? "";
         break;
+      case "--repeat":
+        repeat = parseInt(ourArgs[++i] ?? "1") || undefined;
+        break;
       case "--live":
         live = true;
         break;
@@ -232,6 +243,7 @@ function parseArgs(args: string[]): ParsedArgs {
       requests,
       seed,
       name,
+      repeat,
       live,
       asserts,
       open,
@@ -292,6 +304,7 @@ async function main(): Promise<void> {
         shape: parsed.opts.shape || undefined,
         outputPath: parsed.opts.outputPath || undefined,
         name: parsed.opts.name || undefined,
+        repeat: parsed.opts.repeat,
         seed: parsed.opts.seed,
         json: parsed.opts.json,
         verbose: parsed.opts.verbose,
@@ -342,6 +355,24 @@ async function main(): Promise<void> {
         open: parsed.opts.open,
         json: parsed.opts.json,
         asserts: parsed.opts.asserts,
+      });
+      Deno.exit(exitCode);
+      break;
+    }
+
+    case "aggregate": {
+      if (parsed.positionalArgs.length < 2) {
+        console.error(
+          "Error: aggregate requires at least 2 run names or file paths",
+        );
+        Deno.exit(1);
+      }
+      const exitCode = await aggregateCommand({
+        runsDir,
+        inputs: parsed.positionalArgs,
+        outputPath: parsed.opts.outputPath || undefined,
+        name: parsed.opts.name || undefined,
+        json: parsed.opts.json,
       });
       Deno.exit(exitCode);
       break;

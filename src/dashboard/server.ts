@@ -5,6 +5,11 @@
  * Individual request events are NOT streamed — only aggregated windows.
  * When the test completes, sends a 'complete' event with the full PreparedData,
  * making the page self-contained.
+ *
+ * For --repeat runs, supports multiple sequential runs with per-run events:
+ * - 'new-run' signals the start of each run
+ * - 'run-complete' sends PreparedData for a finished run
+ * - 'all-complete' sends aggregate summary and closes SSE
  */
 
 import type {
@@ -20,7 +25,14 @@ export interface DashboardServer {
   pushEvent(event: RequestEvent): void;
   pushMeta(meta: MetaEvent): void;
   pushMessage(msg: string): void;
+  /** Single-run completion: sends PreparedData and closes SSE. */
   complete(summary: SummaryEvent): void;
+  /** Multi-run: signal start of run i/total, resets per-run state. */
+  startRun(index: number, total: number): void;
+  /** Multi-run: complete one run, send its PreparedData without closing SSE. */
+  completeRun(index: number, summary: SummaryEvent): void;
+  /** Multi-run: all runs done, send aggregate and close SSE. */
+  allComplete(aggregateSummary: SummaryEvent): void;
   stop(): Promise<void>;
 }
 
@@ -29,7 +41,7 @@ export function createDashboardServer(): DashboardServer {
   let liveHtml = "";
   const encoder = new TextEncoder();
   const controllers = new Set<ReadableStreamDefaultController>();
-  const allEvents: RequestEvent[] = [];
+  let allEvents: RequestEvent[] = [];
   let meta: MetaEvent | null = null;
   let windowBuffer: RequestEvent[] = [];
   let windowStart = 0;
@@ -79,6 +91,30 @@ export function createDashboardServer(): DashboardServer {
     };
     windowBuffer = [];
     sendToAll("window", JSON.stringify(w));
+  }
+
+  function buildPreparedData(summary: SummaryEvent) {
+    const chartData: ChartData = {
+      meta,
+      events: allEvents,
+      summary,
+    };
+    return prepareData(chartData);
+  }
+
+  function resetRunState() {
+    allEvents = [];
+    windowBuffer = [];
+    windowStart = 0;
+  }
+
+  function closeAllConnections() {
+    for (const ctrl of controllers) {
+      try {
+        ctrl.close();
+      } catch { /* already closed */ }
+    }
+    controllers.clear();
   }
 
   return {
@@ -156,32 +192,54 @@ export function createDashboardServer(): DashboardServer {
       sendToAll("message", JSON.stringify({ text: msg, t: Date.now() }));
     },
 
+    // ─── Single-run completion ──────────────────────────────────
+
     complete(summary: SummaryEvent) {
-      // Flush any remaining window
       flushWindow();
       if (flushTimer !== null) {
         clearInterval(flushTimer);
         flushTimer = null;
       }
 
-      // Build ChartData from accumulated state and compute PreparedData
-      const chartData: ChartData = {
-        meta,
-        events: allEvents,
-        summary,
-      };
-      const prepared = prepareData(chartData);
-
-      // Send PreparedData as the complete event — browser re-renders with full dataset
+      const prepared = buildPreparedData(summary);
       sendToAll("complete", JSON.stringify(prepared));
+      closeAllConnections();
+    },
 
-      // Close all SSE connections
-      for (const ctrl of controllers) {
-        try {
-          ctrl.close();
-        } catch { /* already closed */ }
+    // ─── Multi-run (--repeat) ───────────────────────────────────
+
+    startRun(index: number, total: number) {
+      resetRunState();
+      sendToAll("new-run", JSON.stringify({ index, total }));
+    },
+
+    completeRun(index: number, summary: SummaryEvent) {
+      // Flush remaining window data for this run
+      flushWindow();
+
+      const prepared = buildPreparedData(summary);
+      sendToAll(
+        "run-complete",
+        JSON.stringify({ index, prepared }),
+      );
+
+      // Reset state for the next run
+      resetRunState();
+    },
+
+    allComplete(aggregateSummary: SummaryEvent) {
+      if (flushTimer !== null) {
+        clearInterval(flushTimer);
+        flushTimer = null;
       }
-      controllers.clear();
+
+      sendToAll(
+        "all-complete",
+        JSON.stringify({
+          summary: aggregateSummary,
+        }),
+      );
+      closeAllConnections();
     },
 
     async stop() {

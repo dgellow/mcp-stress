@@ -108,7 +108,7 @@ Deno.bench("baseline (await only)", async () => {
   const mid = recorder.registerMethod("ping");
   const records: unknown[] = [];
   let currentT = 0;
-  const timer = setInterval(() => {
+  const _timer = setInterval(() => {
     currentT = performance.now();
   }, 1);
 

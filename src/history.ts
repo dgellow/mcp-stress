@@ -64,3 +64,20 @@ export function validateRunName(name: string): string | null {
   }
   return null;
 }
+
+export async function ensureRunSubdir(
+  runsDir: string,
+  name: string,
+): Promise<string> {
+  const dir = join(runsDir, name);
+  await Deno.mkdir(dir, { recursive: true });
+  return dir;
+}
+
+export function runSubdirPath(
+  runsDir: string,
+  name: string,
+  index: number,
+): string {
+  return join(runsDir, name, `${index}.ndjson`);
+}

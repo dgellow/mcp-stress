@@ -2,6 +2,7 @@
  * `history` command — list and manage saved runs.
  */
 
+import { join } from "@std/path";
 import { runPath } from "../history.ts";
 import { readNdjson } from "../metrics/ndjson.ts";
 
@@ -132,10 +133,19 @@ async function deleteRun(
 
   try {
     await Deno.remove(path);
-    console.log(`Deleted run: ${name}`);
-    return 0;
   } catch {
     console.error(`No saved run named "${name}".`);
     return 1;
   }
+
+  // Also remove the subdirectory of individual runs if it exists
+  const subdir = join(runsDir, name);
+  try {
+    await Deno.remove(subdir, { recursive: true });
+  } catch {
+    // No subdir — that's fine
+  }
+
+  console.log(`Deleted run: ${name}`);
+  return 0;
 }

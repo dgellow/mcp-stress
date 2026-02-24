@@ -35,6 +35,7 @@ export interface PhaseResult {
 }
 
 export interface RunResult {
+  meta: MetaEvent;
   summary: import("../metrics/events.ts").SummaryEvent;
   profile: WorkloadProfile;
   phases?: PhaseResult[];
@@ -107,7 +108,7 @@ export async function executeRun(opts: RunOptions): Promise<RunResult> {
     recorder.complete();
     const summary = await writer.stats();
     writer.close();
-    return { summary, profile, ...result };
+    return { meta, summary, profile, ...result };
   }
 
   const transport = opts.createTransport();
@@ -129,7 +130,7 @@ export async function executeRun(opts: RunOptions): Promise<RunResult> {
   const summary = await writer.stats();
   writer.close();
 
-  return { summary, profile, ...extra };
+  return { meta, summary, profile, ...extra };
 }
 
 // ─── Tool discovery ─────────────────────────────────────────────
