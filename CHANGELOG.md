@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.2
+
+### Bug Fixes
+
+- embed dashboard templates at build time instead of reading at runtime
+
 ## 0.2.1
 
 ### Bug Fixes
