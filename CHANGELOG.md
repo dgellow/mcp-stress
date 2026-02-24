@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.2.1
+
+### Bug Fixes
+
+- replace shared runs list with sharing instructions on web home page
+
+### Chores
+
+- add --version flag with pls-managed version file
+
 ## 0.2.0
 
 ### Features
