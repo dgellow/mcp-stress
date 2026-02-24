@@ -23,7 +23,8 @@
     "test": "deno test src/tests/"
   },
   "exclude": [
-    "mcps/"
+    "mcps/",
+    "web/"
   ],
   "fmt": {
     "exclude": [

@@ -22,4 +22,11 @@ echo "=== npm build ($platform) ==="
 deno run -A scripts/build_npm.ts --platform "$platform"
 
 echo ""
+echo "=== Web app build ==="
+cd web
+deno install
+deno task build
+cd ..
+
+echo ""
 echo "Build complete."

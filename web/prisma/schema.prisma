@@ -1,0 +1,23 @@
+generator client {
+  provider            = "prisma-client"
+  output              = "./generated"
+  moduleFormat        = "esm"
+  importFileExtension = "ts"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Run {
+  id         String   @id
+  title      String
+  created_at DateTime @default(now()) @db.Timestamptz()
+  meta       Json
+  summary    Json
+  ndjson     String
+  size_bytes Int
+
+  @@index([created_at(sort: Desc)])
+  @@map("runs")
+}

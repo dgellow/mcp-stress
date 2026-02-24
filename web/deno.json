@@ -1,0 +1,74 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "vite",
+    "build": "deno task prisma:generate && vite build",
+    "start": "deno serve -A _fresh/server.js",
+    "migrate": "deno run -A npm:prisma migrate deploy",
+    "prisma:generate": "deno run -A npm:prisma generate",
+    "prisma:migrate-dev": "deno run -A npm:prisma migrate dev"
+  },
+  "lint": {
+    "rules": {
+      "tags": [
+        "fresh",
+        "recommended"
+      ]
+    }
+  },
+  "exclude": [
+    "**/_fresh/*",
+    "node_modules/**",
+    "prisma/generated/**",
+    "static/**"
+  ],
+  "imports": {
+    "@/": "./",
+    "@mcp-stress/": "../src/",
+    "@prisma/client": "./prisma/generated/client.ts",
+    "@prisma/client/runtime/client": "npm:@prisma/client@^7.1.0/runtime/client",
+    "@prisma/client/runtime/query_compiler_bg.postgresql.mjs": "npm:@prisma/client@^7.1.0/runtime/query_compiler_bg.postgresql.mjs",
+    "@prisma/client/runtime/query_compiler_bg.postgresql.wasm-base64.mjs": "npm:@prisma/client@^7.1.0/runtime/query_compiler_bg.postgresql.wasm-base64.mjs",
+    "@prisma/adapter-pg": "npm:@prisma/adapter-pg@^7.1.0",
+    "pg": "npm:pg@^8.16.3",
+    "fresh": "jsr:@fresh/core@^2.2.0",
+    "fresh/runtime": "jsr:@fresh/core@^2.2.0/runtime",
+    "preact": "npm:preact@^10.28.0",
+    "@preact/signals": "npm:@preact/signals@^2.5.1",
+    "@fresh/plugin-vite": "jsr:@fresh/plugin-vite@^1.0.8",
+    "prisma": "npm:prisma@^7.1.0",
+    "vite": "npm:vite@^7.2.7",
+    "tailwindcss": "npm:tailwindcss@^4.1.18",
+    "@tailwindcss/vite": "npm:@tailwindcss/vite@^4.1.18"
+  },
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.asynciterable",
+      "dom.iterable",
+      "deno.ns"
+    ],
+    "jsx": "precompile",
+    "jsxImportSource": "preact",
+    "jsxPrecompileSkipElements": [
+      "a",
+      "img",
+      "source",
+      "body",
+      "html",
+      "head",
+      "title",
+      "meta",
+      "script",
+      "link",
+      "style",
+      "base",
+      "noscript",
+      "template"
+    ]
+  },
+  "allowScripts": [
+    "npm:@prisma/engines@*",
+    "npm:prisma@*"
+  ]
+}

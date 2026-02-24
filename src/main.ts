@@ -7,6 +7,7 @@ import { chartCommand } from "./commands/chart.ts";
 import { compareCommand } from "./commands/compare.ts";
 import { historyCommand } from "./commands/history.ts";
 import { aggregateCommand } from "./commands/aggregate.ts";
+import { shareCommand } from "./commands/share.ts";
 import { diagnoseCommand } from "./commands/diagnose.ts";
 import { discoverCommand } from "./commands/discover.ts";
 import { SHAPES } from "./engine/shapes.ts";
@@ -23,6 +24,7 @@ USAGE:
   mcp-stress compare <baseline> <current> [options]
   mcp-stress chart <input> [output.html] [options]
   mcp-stress aggregate <run1> <run2> [...] [options]
+  mcp-stress share <name-or-file> [--server URL]
   mcp-stress history [list | rm <name>]
   mcp-stress diagnose [--url <url> | -- <command>]
   mcp-stress discover [--url <url> | -- <command>]
@@ -34,6 +36,7 @@ COMMANDS:
   compare           Compare two test runs (file paths or saved names)
   chart             Generate HTML chart (file path or saved name)
   aggregate         Combine multiple runs into a statistical summary
+  share             Upload a run to mcpstress.com
   history           List or manage saved runs
   diagnose          Probe server connectivity and protocol compliance
   discover          Enumerate server capabilities
@@ -79,6 +82,8 @@ EXAMPLES:
   mcp-stress run --repeat 5 --name stable -d 30 -c 10 -- node server.js
   mcp-stress compare baseline after-fix --open
   mcp-stress aggregate baseline after-fix --name combined
+  mcp-stress share baseline
+  mcp-stress share results.ndjson --server https://custom.example.com
   mcp-stress chart --open results.ndjson
   mcp-stress history
   mcp-stress history rm baseline
@@ -104,6 +109,7 @@ interface ParsedArgs {
     name: string;
     repeat: number | undefined;
     live: boolean;
+    server: string;
     asserts: string[];
     open: boolean;
     headers: Record<string, string>;
@@ -135,6 +141,7 @@ function parseArgs(args: string[]): ParsedArgs {
   let name = "";
   let repeat: number | undefined;
   let live = false;
+  let server = "";
   let open = false;
   const asserts: string[] = [];
   const headers: Record<string, string> = {};
@@ -199,6 +206,9 @@ function parseArgs(args: string[]): ParsedArgs {
       case "--live":
         live = true;
         break;
+      case "--server":
+        server = ourArgs[++i] ?? "";
+        break;
       case "--open":
         open = true;
         break;
@@ -245,6 +255,7 @@ function parseArgs(args: string[]): ParsedArgs {
       name,
       repeat,
       live,
+      server,
       asserts,
       open,
       headers,
@@ -373,6 +384,26 @@ async function main(): Promise<void> {
         outputPath: parsed.opts.outputPath || undefined,
         name: parsed.opts.name || undefined,
         json: parsed.opts.json,
+      });
+      Deno.exit(exitCode);
+      break;
+    }
+
+    case "share": {
+      const input = parsed.positionalArgs[0];
+      if (!input) {
+        console.error(
+          "Error: share requires a run name or NDJSON file path",
+        );
+        Deno.exit(1);
+      }
+      const server = parsed.opts.server ||
+        Deno.env.get("MCP_STRESS_SERVER") ||
+        "https://mcpstress.com";
+      const exitCode = await shareCommand({
+        runsDir,
+        input,
+        server,
       });
       Deno.exit(exitCode);
       break;

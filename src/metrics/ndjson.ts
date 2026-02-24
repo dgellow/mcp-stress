@@ -10,8 +10,7 @@ export interface ParsedNdjson {
   summary: SummaryEvent | null;
 }
 
-export async function readNdjson(path: string): Promise<ParsedNdjson> {
-  const text = await Deno.readTextFile(path);
+export function parseNdjsonText(text: string): ParsedNdjson {
   const lines = text.split("\n").filter((l) => l.trim());
 
   let meta: MetaEvent | null = null;
@@ -30,4 +29,9 @@ export async function readNdjson(path: string): Promise<ParsedNdjson> {
   }
 
   return { meta, events, summary };
+}
+
+export async function readNdjson(path: string): Promise<ParsedNdjson> {
+  const text = await Deno.readTextFile(path);
+  return parseNdjsonText(text);
 }

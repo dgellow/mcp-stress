@@ -9,6 +9,4 @@ npm/
 # Test MCP servers
 mcps/
 
-# Deno
-deno.lock
 
