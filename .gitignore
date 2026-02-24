@@ -12,5 +12,3 @@ mcps/
 # Deno
 deno.lock
 
-# Benchmarks
-bench/
