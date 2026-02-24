@@ -13,7 +13,7 @@ export const handler = define.handlers({
     }
 
     const parsed = parseNdjsonText(run.ndjson);
-    const html = await renderHtml({
+    const html = renderHtml({
       mode: "static",
       data: {
         meta: parsed.meta,

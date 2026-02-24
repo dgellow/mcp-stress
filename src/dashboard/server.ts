@@ -118,8 +118,8 @@ export function createDashboardServer(): DashboardServer {
   }
 
   return {
-    async start(): Promise<string> {
-      liveHtml = await renderHtml({ mode: "live" });
+    start(): Promise<string> {
+      liveHtml = renderHtml({ mode: "live" });
 
       // Start window flush timer (every 1 second)
       flushTimer = setInterval(flushWindow, 1000);

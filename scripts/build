@@ -14,6 +14,9 @@ else
   platform="$1"
 fi
 
+echo "=== Generate templates ==="
+deno run -A scripts/gen_templates.ts
+
 echo "=== Deno compile ==="
 deno compile -A --include src/dashboard/templates/ --include src/metrics/writer_worker.ts --output ./build/mcp-stress src/main.ts
 

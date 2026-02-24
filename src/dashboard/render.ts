@@ -16,6 +16,15 @@ import type {
   SummaryEvent,
 } from "../metrics/events.ts";
 import { percentile } from "../metrics/stats.ts";
+import {
+  base,
+  compare,
+  insights,
+  interactions,
+  live,
+  plotly_charts,
+  styles,
+} from "./templates.generated.ts";
 
 export interface RenderOptions {
   mode: "static" | "live" | "compare";
@@ -65,34 +74,16 @@ interface PreparedData {
   windowSec: number;
 }
 
-const TEMPLATE_DIR = new URL("./templates/", import.meta.url);
-
-async function readTemplate(name: string): Promise<string> {
-  const url = new URL(name, TEMPLATE_DIR);
-  return await Deno.readTextFile(url);
-}
-
-export async function renderHtml(opts: RenderOptions): Promise<string> {
-  // Load all templates in parallel
-  const templateNames = [
-    "base.html",
-    "styles.css",
-    "plotly_charts.js",
-    "interactions.js",
-    "insights.js",
-  ];
-  // Only load mode-specific modules
-  if (opts.mode === "live") templateNames.push("live.js");
-  if (opts.mode === "compare") templateNames.push("compare.js");
-
-  const templates = await Promise.all(templateNames.map(readTemplate));
-
-  const baseHtml = templates[0];
-  const styles = templates[1];
-  const chartsJs = templates[2];
-  const interactionsJs = templates[3];
-  const insightsJs = templates[4];
-  const modeJs = templates[5] ?? "";
+export function renderHtml(opts: RenderOptions): string {
+  const baseHtml = base;
+  const chartsJs = plotly_charts;
+  const interactionsJs = interactions;
+  const insightsJs = insights;
+  const modeJs = opts.mode === "live"
+    ? live
+    : opts.mode === "compare"
+    ? compare
+    : "";
 
   let dataScript = "";
   let title = "mcp-stress";

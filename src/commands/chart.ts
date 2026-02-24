@@ -35,7 +35,7 @@ export async function chartCommand(opts: ChartCommandOptions): Promise<number> {
 
   console.log(`  ${data.events.length} events, generating chart...`);
 
-  const html = await renderHtml({
+  const html = renderHtml({
     mode: "static",
     data: {
       meta: data.meta,

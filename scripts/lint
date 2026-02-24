@@ -1,5 +1,13 @@
 #!/usr/bin/env bash
 set -euo pipefail
+
+# Verify generated templates are up to date
+deno run -A scripts/gen_templates.ts
+if ! git diff --quiet src/dashboard/templates.generated.ts 2>/dev/null; then
+  echo "ERROR: src/dashboard/templates.generated.ts is stale. Run: deno run -A scripts/gen_templates.ts"
+  exit 1
+fi
+
 deno fmt --check
 deno check
 deno lint

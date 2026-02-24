@@ -184,7 +184,7 @@ export async function compareCommand(
   } else {
     outputPath = `${opts.currentPath}-compare.html`;
   }
-  const html = await renderHtml({
+  const html = renderHtml({
     mode: "compare",
     baseline: {
       meta: baseline.meta,
