@@ -71,7 +71,11 @@ a {
   color: var(--text-muted);
   margin-top: 4px;
 }
-.theme-toggle {
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.header-btn {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 6px;
@@ -81,9 +85,13 @@ a {
   color: var(--text-muted);
   transition: all 0.2s;
 }
-.theme-toggle:hover {
+.header-btn:hover {
   border-color: var(--accent);
   color: var(--text);
+}
+.header-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .stats {

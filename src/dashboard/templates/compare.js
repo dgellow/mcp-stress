@@ -257,4 +257,45 @@
     }),
     plotlyCfg,
   );
+  // ─── Save summary card ───
+  const copyBtn = document.getElementById("copy-summary");
+  copyBtn.style.display = "";
+  copyBtn.textContent = "Save summary card";
+  copyBtn.addEventListener("click", function () {
+    copyBtn.disabled = true;
+    copyBtn.textContent = "Saving...";
+
+    const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+
+    // Hide everything except summary table + throughput chart
+    const chartsEl = section.querySelector(".charts");
+    const chartDivs = chartsEl ? Array.from(chartsEl.children) : [];
+    for (let i = 1; i < chartDivs.length; i++) chartDivs[i].style.display = "none";
+
+    const header = document.querySelector(".header");
+    const stats = document.getElementById("stats");
+    const runParams = document.getElementById("run-params");
+    header.style.display = "none";
+    stats.style.display = "none";
+    runParams.style.display = "none";
+
+    htmlToImage.toPng(section, { backgroundColor: bg, pixelRatio: 2 })
+      .then(function (dataUrl) {
+        const a = document.createElement("a");
+        a.download = "mcp-stress-compare-" + new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19) + ".png";
+        a.href = dataUrl;
+        a.click();
+      })
+      .catch(function (err) {
+        console.error("Save summary card failed:", err);
+      })
+      .finally(function () {
+        for (let i = 1; i < chartDivs.length; i++) chartDivs[i].style.display = "";
+        header.style.display = "";
+        stats.style.display = "";
+        runParams.style.display = "";
+        copyBtn.disabled = false;
+        copyBtn.textContent = "Save summary card";
+      });
+  });
 })();

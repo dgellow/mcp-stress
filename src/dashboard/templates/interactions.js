@@ -1,3 +1,35 @@
+// ─── Save as image ───
+
+document.getElementById("save-image").addEventListener("click", function () {
+  const btn = this;
+  btn.disabled = true;
+  btn.textContent = "Saving...";
+
+  const actions = document.querySelector(".header-actions");
+  const liveStatus = document.querySelector(".live-status");
+  actions.style.display = "none";
+  if (liveStatus) liveStatus.style.display = "none";
+
+  const bg = getComputedStyle(document.documentElement).getPropertyValue("--bg").trim();
+
+  htmlToImage.toPng(document.body, { backgroundColor: bg })
+    .then(function (dataUrl) {
+      const a = document.createElement("a");
+      a.download = "mcp-stress-" + new Date().toISOString().replace(/[:.]/g, "-").slice(0, 19) + ".png";
+      a.href = dataUrl;
+      a.click();
+    })
+    .catch(function (err) {
+      console.error("Save as image failed:", err);
+    })
+    .finally(function () {
+      actions.style.display = "";
+      if (liveStatus) liveStatus.style.display = "";
+      btn.disabled = false;
+      btn.textContent = "Save as image";
+    });
+});
+
 // ─── Theme toggle ───
 
 let isDark = localStorage.getItem("mcp-stress-theme") !== "light";
