@@ -10,6 +10,7 @@ import { aggregateCommand } from "./commands/aggregate.ts";
 import { shareCommand } from "./commands/share.ts";
 import { diagnoseCommand } from "./commands/diagnose.ts";
 import { discoverCommand } from "./commands/discover.ts";
+import { VERSION } from "./version.ts";
 import { SHAPES } from "./engine/shapes.ts";
 import { BUILTIN_PROFILES } from "./engine/workload.ts";
 import { ensureRunsDir } from "./history.ts";
@@ -30,6 +31,7 @@ USAGE:
   mcp-stress discover [--url <url> | -- <command>]
   mcp-stress profiles
   mcp-stress shapes
+  mcp-stress --version
 
 COMMANDS:
   run               Execute a stress test
@@ -270,6 +272,11 @@ async function main(): Promise<void> {
 
   if (raw.length === 0 || raw[0] === "--help" || raw[0] === "-h") {
     usage();
+    Deno.exit(0);
+  }
+
+  if (raw[0] === "--version") {
+    console.log(`mcp-stress ${VERSION}`);
     Deno.exit(0);
   }
 
